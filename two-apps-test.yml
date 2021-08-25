@@ -1,0 +1,62 @@
+---
+- name: update web servers
+  hosts: n2
+  become: true
+  tasks:
+  - name: SElinux permissive
+    selinux:
+      policy: targeted
+      state: permissive
+  - name: make sure httpd installed
+    yum:
+      name: httpd
+      state: installed
+  - name: make sure start httpd
+    service:
+      name: httpd
+      state: started
+  - name: make sure httpd enabled
+    service:
+      name: httpd
+      enabled: yes
+  - name: make sure git installed
+    yum:
+      name: git
+      state: installed
+  - name: make sure create food directory
+    file:
+      path: /home/centos/food
+      state: directory
+  - name: make sure create ecomm directory
+    file:
+      path: /home/centos/ecomm
+      state: directory
+  - name: clone repo to food
+    git:
+      repo: https://github.com/ravi2krishna/food
+      dest: /home/centos/food
+  - name: clone repo to ecomm
+    git:
+      repo: https://github.com/ravi2krishna/ecomm
+      dest: /home/centos/ecomm
+  - name: copy food to /var/www/html
+    copy:
+      src: /home/centos/food
+      dest: /var/www/html/
+      remote_src: yes
+  - name: copy ecomm to /var/www/html
+    copy:
+      src: /home/centos/ecomm
+      dest: /var/www/html/
+      remote_src: yes
+  - name: copy httpd.conf
+    copy:
+      src: /home/centos/httpd.conf
+      dest: /etc/httpd/conf/httpd.conf
+  - name: make sure system restarted
+    service:
+      name: httpd
+      state: restarted
+
+
+      
